@@ -1,0 +1,61 @@
+---
+layout: runbook
+title: '#4471 · three problems, not one'
+owner: support desk
+status: open
+reviewed: 2026-10-31
+signature: simran0203
+---
+
+<script>
+  import ProblemTable from '#lib/kb/ProblemTable.svelte';
+  import Callout from '#lib/kb/Callout.svelte';
+  import RenderStamp from '#lib/kb/RenderStamp.svelte';
+
+  const issues = {
+    parser: 'https://github.com/simran0203/mega-dev/issues/1',
+    hint: 'https://github.com/simran0203/mega-dev/issues/2',
+    'one-day': 'https://github.com/simran0203/mega-dev/issues/3',
+  };
+</script>
+
+[#4471](/kb/incidents/4471) is marked known: one parser bug, one fix queued. Its reports say
+otherwise. The desk merged them on subject line alone ([decision 0001](/kb/decisions/0001-dedupe-by-subject)),
+so three problems with different fixes sit in one ticket. The parser fix alone will not close the
+other two.
+
+<Callout kind="warn">
+Not one issue. Each problem below has its own ticket and its own count. Do not close #4471's
+reports against the parser fix until each ticket is checked.
+</Callout>
+
+## What #4471 holds
+
+<ProblemTable ticket={4471} {issues} />
+
+## How each report was placed
+
+- **By tenant, not by intake tag.** Intake guesses `parser` or `hint` from the reporter's browser.
+  The cause depends on the tenant's locale and booking form (`causes.ts`), and the two disagree
+  often. The table ignores the tag.
+- **`parser`.** Every tenant on #4471 writes the day first. The shared parser reads month first,
+  so day and month swap: a booking for 4 March lands on 3 April. Only a date with a day of 12 or less
+  can swap, which is why tenants see it on some bookings and not others.
+- **`hint`.** booking-v3 prints `MM/DD/YYYY` under its date field, and the form then reads the
+  date the tenant's way, day first. People type what the hint says, so the date swaps before the
+  parser sees it. Only reports sent through the form, from tenants on booking-v3. Fixing the
+  parser does not fix this; the hint must follow the tenant's locale.
+- **`one-day`.** The date is not swapped; it moves by a day ("Tuesday 12 May" shows as
+  "Monday 11 May"), or the same meeting shows different days to people in different time zones.
+  The desk had already read these reports this way (`desk-notes.json`), but the #4471 page
+  counts them under `parser` as a footnote. They need their own ticket: a parser fix will not
+  move them back.
+- **Repeats.** The ticket export comes in overlapping pages, so some reports appear twice. Each
+  report is counted once, by its id.
+
+## What changes
+
+- #4471 stays open until each ticket above is closed or confirmed fixed.
+- New date reports: place them with this table's rule, not by subject line.
+
+<RenderStamp {signature} />
